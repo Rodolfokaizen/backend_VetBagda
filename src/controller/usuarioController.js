@@ -31,7 +31,69 @@ endpoints.post('/usuarios', (req, res) => {
       res.json({ message: 'Usuário removido com sucesso.' });
     });
   });
-  
+
+  // Listar todos os usuarios 
+  endpoints.get('/usuarios', (req, res) => {
+    db.query('SELECT * FROM usuarios', (err, results) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json(results);
+    });
+  });
+
+
+  // Atualizar usuário
+endpoints.put('/usuarios/:id', (req, res) => {
+  const {
+    login, senha, nome, cpf, celular, data_nascimento, endereco, cidade, estado, cep
+  } = req.body;
+
+  const sql = `
+    UPDATE usuarios SET 
+      login = ?, senha = ?, nome = ?, cpf = ?, celular = ?, 
+      data_nascimento = ?, endereco = ?, cidade = ?, estado = ?, cep = ?
+    WHERE id = ?`;
+
+  db.query(sql, [login, senha, nome, cpf, celular, data_nascimento, endereco, cidade, estado, cep, req.params.id], 
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ message: 'Usuário atualizado com sucesso' });
+    }
+  );
+});
+
+
+  // Buscar um usuário específico por id 
+endpoints.get('/usuarios/:id', (req, res) => {
+  const { id } = req.params;
+
+  db.query('SELECT * FROM usuarios WHERE id = ?', [id], (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    res.json(results[0]);
+  });
+});
+
+// Atualizar apenas login e senha do usuário
+endpoints.put('/usuarios/:id/credenciais', (req, res) => {
+  const { login, senha } = req.body;
+  const { id } = req.params;
+
+  const sql = 'UPDATE usuarios SET login = ?, senha = ? WHERE id = ?';
+
+  db.query(sql, [login, senha, id], (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    res.json({ message: 'Credenciais atualizadas com sucesso' });
+  });
+});
 
 
 
