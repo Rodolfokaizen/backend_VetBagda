@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Testar Endpoints</title>
+</head>
+<body>
+  <h2>Criar Usuário</h2>
+  <form id="createForm">
+    <input type="text" placeholder="Login" name="login" required><br>
+    <input type="password" placeholder="Senha" name="senha" required><br>
+    <input type="text" placeholder="Nome" name="nome" required><br>
+    <input type="text" placeholder="CPF" name="cpf" required><br>
+    <input type="text" placeholder="Celular" name="celular" required><br>
+    <input type="date" placeholder="Data de Nascimento" name="data_nascimento" required><br>
+    <input type="text" placeholder="Endereço" name="endereco" required><br>
+    <input type="text" placeholder="Cidade" name="cidade" required><br>
+    <input type="text" placeholder="Estado" name="estado" required><br>
+    <input type="text" placeholder="CEP" name="cep" required><br>
+    <button type="submit">Criar</button>
+  </form>
+
+  <h2>Buscar Todos</h2>
+  <button onclick="listarUsuarios()">Listar Usuários</button>
+  <pre id="lista"></pre>
+
+  <h2>Buscar por ID</h2>
+  <input type="number" id="buscarId" placeholder="ID do usuário">
+  <button onclick="buscarPorId()">Buscar</button>
+  <pre id="usuario"></pre>
+
+  <h2>Atualizar Usuário</h2>
+  <form id="updateForm">
+    <input type="number" name="id" placeholder="ID"><br>
+    <input type="text" placeholder="Login" name="login"><br>
+    <input type="password" placeholder="Senha" name="senha"><br>
+    <input type="text" placeholder="Nome" name="nome"><br>
+    <input type="text" placeholder="CPF" name="cpf"><br>
+    <input type="text" placeholder="Celular" name="celular"><br>
+    <input type="date" placeholder="Data de Nascimento" name="data_nascimento"><br>
+    <input type="text" placeholder="Endereço" name="endereco"><br>
+    <input type="text" placeholder="Cidade" name="cidade"><br>
+    <input type="text" placeholder="Estado" name="estado"><br>
+    <input type="text" placeholder="CEP" name="cep"><br>
+    <button type="submit">Atualizar</button>
+  </form>
+
+   
+
+<h2>Atualizar Credenciais (Login e Senha)</h2>
+<form id="updateCredenciaisForm">
+  <input type="number" name="id" placeholder="ID do usuário" required><br>
+  <input type="text" name="login" placeholder="Novo login" required><br>
+  <input type="password" name="senha" placeholder="Nova senha" required><br>
+  <button type="submit">Atualizar Credenciais</button>
+</form>
+
+
+  <h2>Deletar Usuário</h2>
+  <input type="number" id="deletarId" placeholder="ID do usuário">
+  <button onclick="deletarUsuario()">Deletar</button>
+  <pre id="resposta"></pre>
+
+  <script>
+    const baseUrl = 'http://localhost:5001/usuarios';
+
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const data = Object.fromEntries(form.entries());
+
+      const res = await fetch(baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      alert(JSON.stringify(json));
+    });
+
+    async function listarUsuarios() {
+      const res = await fetch(baseUrl);
+      const json = await res.json();
+      document.getElementById('lista').textContent = JSON.stringify(json, null, 2);
+    }
+
+    async function buscarPorId() {
+      const id = document.getElementById('buscarId').value;
+      const res = await fetch(`${baseUrl}/${id}`);
+      const json = await res.json();
+      document.getElementById('usuario').textContent = JSON.stringify(json, null, 2);
+    }
+
+    document.getElementById('updateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const id = form.get('id');
+      const data = Object.fromEntries(form.entries());
+      delete data.id;
+
+      const res = await fetch(`${baseUrl}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      alert(JSON.stringify(json));
+    });
+
+    async function deletarUsuario() {
+      const id = document.getElementById('deletarId').value;
+      const res = await fetch(`${baseUrl}/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      document.getElementById('resposta').textContent = JSON.stringify(json, null, 2);
+    }
+
+    document.getElementById('updateCredenciaisForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const id = form.get('id');
+  const data = {
+    login: form.get('login'),
+    senha: form.get('senha')
+  };
+
+  const res = await fetch(`${baseUrl}/${id}/credenciais`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  const json = await res.json();
+  alert(JSON.stringify(json));
+});
+
+  </script>
+</body>
+</html>
